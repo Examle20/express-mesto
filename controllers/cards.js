@@ -60,7 +60,8 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { $pull: { likes: req.user._id } }, // убрать _id из массива
   { new: true },
 )
-  .then(()=> res.send({ message: 'Успешно'}))
+  .populate('likes')
+  .then((card)=> res.send({likes: card.likes}))
   .catch((err) =>{
     if(err.name === 'TypeError' || err.name ==='CastError'){
       res.status(400).send({ message: 'Переданы некорректные данные для снятия лайка'});
