@@ -3,6 +3,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   console.log(req.user._id); // _id станет доступен
   Card.find({})
+    .populate(['owner', 'likes'])
     .then(cards => res.send({data: cards}))
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
@@ -18,5 +19,22 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then(()=> res.send({ message: 'Успешно'}))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => res.status(500).send({ message: 'Произошла ошибка' }));
 };
+
+module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
+  req.params.cardId,
+  { $addToSet: { likes: req.user._id } },
+  { new: true },
+)
+  .populate('likes')
+  .then((card)=> res.send({likes: card.likes}))
+  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+
+module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
+  req.params.cardId,
+  { $pull: { likes: req.user._id } }, // убрать _id из массива
+  { new: true },
+)
+  .then(()=> res.send({ message: 'Успешно'}))
+  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
