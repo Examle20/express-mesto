@@ -10,6 +10,12 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator(v) {
+        return /(https?):\/\/\S{2,}\.\S{2,}/.test(v);
+      },
+      message: (props) => `${props.value} Неправильный формат ссылки!`,
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
